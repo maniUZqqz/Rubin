@@ -1,0 +1,10 @@
+{% extends 'base/base.html' %}
+{% block title %}اضافه کردن کلاس{% endblock %}
+{% block body %}
+    <h2>اضافه کردن کلاس جدید</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">ذخیره</button>
+    </form>
+{% endblock %}

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>چت با هوش مصنوعی</title>
+    <link rel="stylesheet" href="{% static 'css/AI-Chat.css' %}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 400px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .chat-message {
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.6;
+            max-width: 80%;
+            display: inline-block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .sent {
+            background: #007bff;
+            color: white;
+            align-self: flex-end;
+            text-align: right;
+        }
+
+        .received {
+            background: #eaeaea;
+            color: black;
+            text-align: left;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        form {
+            margin-top: 15px;
+            display: flex;
+            gap: 8px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #218838;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>چت با هوش مصنوعی</h1>
+
+        {% if question %}
+            <div class="chat-message sent">
+                <p><strong>شما:</strong> {{ question }}</p>
+            </div>
+        {% endif %}
+
+        {% if answer %}
+            <div class="chat-message received">
+                <p><strong>هوش مصنوعی:</strong> {{ answer }}</p>
+            </div>
+        {% endif %}
+
+        {% if error %}
+            <div class="error-message">
+                <p>{{ error }}</p>
+            </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'chat_with_ai' %}">
+            {% csrf_token %}
+            <input type="text" name="question" placeholder="سوال خود را اینجا بنویسید..." required>
+            <button type="submit">ارسال</button>
+        </form>
+    </div>
+</body>
+</html>

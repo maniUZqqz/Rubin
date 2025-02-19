@@ -1,0 +1,65 @@
+/* استایل کلی صفحه */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Vazirmatn', sans-serif;
+    direction: rtl;
+}
+
+h1 {
+    text-align: center;
+    color: #1e73da;
+}
+
+/* استایل فرم */
+form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+form input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+form button {
+    padding: 10px 20px;
+    background-color: #1e73da;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+form button:hover {
+    background-color: #155a9e;
+}
+
+/* استایل پیام‌ها */
+.chat-message {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    max-width: 70%;
+    word-wrap: break-word;
+}
+
+.chat-message.sent {
+    background-color: #c8e6c9;
+    margin-left: auto;
+}
+
+.chat-message.received {
+    background-color: #e1f5fe;
+    margin-right: auto;
+}
+
+/* استایل خطا */
+.error-message {
+    color: red;
+    margin-bottom: 20px;
+}

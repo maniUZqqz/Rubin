@@ -1,0 +1,24 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}QQz{% endblock %}
+
+{% block link %}
+
+
+{% endblock %}
+
+{% block body %}
+
+
+    <div class="container">
+    <h2>تأیید کد بازیابی</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">تأیید</button>
+    </form>
+</div>
+
+
+{% endblock %}

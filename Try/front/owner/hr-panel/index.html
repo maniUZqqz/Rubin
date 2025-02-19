@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Dynamic Columns, CRUD & Search</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+            crossorigin="anonymous"
+    />
+
+    <!-- فونت Poppins از گوگل -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+            rel="preconnect"
+            href="https://fonts.gstatic.com"
+            crossorigin
+    >
+    <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+            rel="stylesheet"
+    >
+
+    <style>
+        /****************************************************
+         *   بدنه و پس‌زمینه گرادیانی + اورب‌های شناور
+         ****************************************************/
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden; /* جلوگیری از اسکرول افقی ناخواسته */
+
+            /* پس‌زمینه با شیب متحرک */
+            background: linear-gradient(-45deg, #a3f7ff, #75e8f7, #52d1e9, #0f9baf);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: #333;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /*
+          ایجاد اورب‌های شناور (floating orbs) در پس‌زمینه
+        */
+        body::before,
+        body::after {
+            content: "";
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            z-index: 0;
+            top: 30%;
+            left: 10%;
+            filter: blur(80px);
+            animation: floatOrb1 12s ease-in-out infinite;
+        }
+
+        body::after {
+            top: 60%;
+            left: 70%;
+            filter: blur(100px);
+            animation: floatOrb2 18s ease-in-out infinite;
+        }
+
+        @keyframes floatOrb1 {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+            }
+            50% {
+                transform: translateY(-50px) translateX(30px);
+            }
+        }
+
+        @keyframes floatOrb2 {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+            }
+            50% {
+                transform: translateY(60px) translateX(-40px);
+            }
+        }
+
+        /* جلوه شیشه‌ای */
+        .container, footer {
+            position: relative;
+            z-index: 1;
+        }
+
+        /****************************************************
+         *   container اصلی
+         ****************************************************/
+        .container {
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /****************************************************
+         *   جعبه شیشه‌ای برای جدول
+         ****************************************************/
+        .table-container {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+
+        /****************************************************
+         *   جدول و استایل آن
+         ****************************************************/
+        table.table {
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            overflow: hidden; /* برای گوشه‌های گرد */
+        }
+
+        thead.table-dark {
+            background-color: #0f9baf !important;
+            border: none;
+        }
+
+        thead.table-dark th {
+            color: #fff;
+            font-weight: 600;
+            border: none;
+            position: relative; /* برای نمایش دکمه حذف ستون در همان th */
+        }
+
+        /* دکمه حذف ستون (X) در هدر */
+        .delete-column-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-weight: bold;
+            font-size: 1rem;
+            position: absolute;
+            top: 8px;
+            right: 5px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .delete-column-btn:hover {
+            opacity: 1;
+        }
+
+        tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        tbody tr:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        /****************************************************
+         *   دکمه‌ها
+         ****************************************************/
+        .btn {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-primary {
+            background-color: #0f9baf;
+            border: none;
+            transition: background 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #0c8092;
+        }
+
+        .btn-add-student {
+            background-color: #0f9baf;
+            border: none;
+            color: #fff;
+            margin-right: 1rem;
+            transition: background 0.3s;
+        }
+
+        .btn-add-student:hover {
+            background-color: #0c8092;
+        }
+
+        .btn-add-column {
+            background-color: #21cf8b;
+            border: none;
+            color: #fff;
+            transition: background 0.3s;
+        }
+
+        .btn-add-column:hover {
+            background-color: #1ba574;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+            transition: background 0.3s;
+        }
+
+        .btn-danger:hover {
+            background-color: #b32432;
+        }
+
+        /* --- NEW: دکمه دانلود CSV */
+        .btn-download-csv {
+            background-color: #ffc107;
+            border: none;
+            color: #333;
+            margin-left: 1rem;
+            transition: background 0.3s;
+        }
+
+        .btn-download-csv:hover {
+            background-color: #e0a900;
+        }
+
+        /****************************************************
+         *   مودال‌ها (ویرایش، افزودن دانشجو، افزودن ستون)
+         ****************************************************/
+        .modal-content {
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: #0f9baf;
+            color: #fff;
+            border-bottom: none;
+        }
+
+        .modal-footer {
+            border-top: none;
+        }
+
+        .btn-close {
+            filter: invert(1); /* تبدیل رنگ ضربدر به سفید */
+        }
+
+        .modal-footer .btn-secondary {
+            background-color: rgba(0, 0, 0, 0.2);
+            border: none;
+        }
+
+        .modal-footer .btn-secondary:hover {
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-footer .btn-success {
+            background-color: #0f9baf;
+            border: none;
+            transition: background 0.3s;
+        }
+
+        .modal-footer .btn-success:hover {
+            background-color: #0c8092;
+        }
+
+        /****************************************************
+         *   فوتر
+         ****************************************************/
+        footer {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
+            padding: 1rem 0;
+        }
+
+        footer p {
+            margin: 0;
+            font-weight: 500;
+        }
+    </style>
+
+</head>
+
+<body>
+<div class="container">
+    <h1 class="mb-3 text-center text-white fw-bold"></h1>
+
+    <!-- دکمه‌ها و فیلد جستجو در بالای جدول -->
+    <div class="row mb-4">
+        <div class="col-md-6 d-flex flex-wrap">
+            <a href="index.html" class="btn btn-secondary me-3 mb-2">بازگشت به پنل</a>
+            <!-- دکمه افزودن دانشجو -->
+            <button class="btn btn-add-student me-3 mb-2" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+                افزودن دانشجوی جدید
+            </button>
+            <!-- دکمه افزودن ستون جدید -->
+            <button class="btn btn-add-column mb-2" data-bs-toggle="modal" data-bs-target="#addColumnModal">
+                افزودن ستون جدید
+            </button>
+
+            <!-- NEW: دکمه دانلود CSV -->
+            <button class="btn btn-download-csv mb-2" onclick="downloadSheet()">
+                دانلود فایل CSV
+            </button>
+        </div>
+
+        <!-- فیلد جستجو -->
+        <div class="col-md-6 mb-2">
+            <div class="input-group">
+                <input
+                        type="text"
+                        class="form-control"
+                        placeholder="جستجو در دانشجویان..."
+                        id="searchInput"
+                        oninput="onSearchChange()"
+                />
+                <span class="input-group-text" id="basic-addon2">جستجو</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- جعبه جدول -->
+    <div class="table-container">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle mb-0">
+                <thead class="table-dark">
+                <tr id="tableHeaderRow">
+                    <!-- به‌صورت دینامیک از آرایه columns ساخته می‌شود -->
+                </tr>
+                </thead>
+                <tbody id="tableBody">
+                <!-- سطرها به‌صورت دینامیک ساخته می‌شوند -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- مودال افزودن ستون جدید -->
+<div
+        class="modal fade"
+        id="addColumnModal"
+        tabindex="-1"
+        aria-labelledby="addColumnModalLabel"
+        aria-hidden="true"
+>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addColumnModalLabel">افزودن ستون جدید</h5>
+                <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                ></button>
+            </div>
+            <div class="modal-body">
+                <form id="addColumnForm">
+                    <div class="mb-3">
+                        <label for="columnKey" class="form-label">نام فیلد (به انگلیسی بدون فاصله)</label>
+                        <input type="text" class="form-control" id="columnKey" required/>
+                    </div>
+                    <div class="mb-3">
+                        <label for="columnLabel" class="form-label">عنوان ستون (برای نمایش)</label>
+                        <input type="text" class="form-control" id="columnLabel" required/>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                >بستن
+                </button>
+                <button
+                        type="button"
+                        class="btn btn-add-column"
+                        onclick="addNewColumn()"
+                >افزودن ستون
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال افزودن دانشجو -->
+<div
+        class="modal fade"
+        id="addStudentModal"
+        tabindex="-1"
+        aria-labelledby="addStudentModalLabel"
+        aria-hidden="true"
+>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addStudentModalLabel">افزودن دانشجوی جدید</h5>
+                <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                ></button>
+            </div>
+            <div class="modal-body" id="addStudentModalBody">
+                <!-- اینجا به‌صورت دینامیک ورودی‌ها را بر اساس ستون‌ها می‌سازیم -->
+            </div>
+            <div class="modal-footer">
+                <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                >بستن
+                </button>
+                <button
+                        type="button"
+                        class="btn btn-success"
+                        onclick="saveNewStudent()"
+                >افزودن
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال ویرایش دانشجو -->
+<div
+        class="modal fade"
+        id="editStudentModal"
+        tabindex="-1"
+        aria-labelledby="editStudentModalLabel"
+        aria-hidden="true"
+>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editStudentModalLabel">ویرایش اطلاعات دانش‌آموز</h5>
+                <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                ></button>
+            </div>
+            <div class="modal-body" id="editStudentModalBody">
+                <!-- به‌صورت دینامیک ساخته می‌شود -->
+            </div>
+            <div class="modal-footer">
+                <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                >بستن
+                </button>
+                <button
+                        type="button"
+                        class="btn btn-success"
+                        onclick="applyEditStudent()"
+                >ذخیره تغییرات
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- فوتر -->
+<footer>
+    <p>© 2025 | Dynamic Table Example (Add/Delete Columns/Students + Search)</p>
+</footer>
+
+<!-- اسکریپت بوت‌استرپ -->
+<script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"
+></script>
+
+<script src="hr-panel.js"></script>
+</body>
+</html>

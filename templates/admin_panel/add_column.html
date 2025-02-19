@@ -1,0 +1,48 @@
+{% extends 'base/base.html' %}
+{% block title %}اضافه کردن ستون{% endblock %}
+
+{% block link %}
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+
+
+{% endblock %}
+
+{% block body %}
+<div class="d-flex align-items-center justify-content-center min-vh-100 bg-light">
+    <div class="card shadow-lg border-0 p-4" style="max-width: 500px; width: 100%;">
+        <div class="card-body">
+            <h2 class="text-center mb-4 text-primary fw-bold">اضافه کردن ستون جدید</h2>
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+
+                <!-- نام ستون -->
+                <div class="mb-3">
+                    <label for="column_name" class="form-label fw-semibold">نام ستون:</label>
+                    <input type="text" name="column_name" id="column_name" class="form-control" required
+                        placeholder="مثلاً: سن، نام، تاریخ تولد">
+                </div>
+
+                <!-- نوع داده -->
+                <div class="mb-3">
+                    <label for="data_type" class="form-label fw-semibold">نوع داده:</label>
+                    <select name="data_type" id="data_type" class="form-select" required>
+                        <option value="char">متن</option>
+                        <option value="int">عدد</option>
+                        <option value="date">تاریخ</option>
+                        <option value="bool">بولین</option>
+                    </select>
+                </div>
+
+                <!-- دکمه ثبت -->
+                <button type="submit" class="btn btn-success w-100 py-2 fw-bold shadow-sm">
+                    ذخیره ستون
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

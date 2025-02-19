@@ -1,0 +1,74 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}about{% endblock %}
+
+{% block link %}
+
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'shared/style.css' %}"/>
+
+{% endblock %}
+
+{% block body %}
+
+
+    <main>
+        <div class="big-wrapper light">
+            <img src="{% static 'images/shape.png' %}" alt="" class="shape"/>
+
+            {% include "includes/header.html" %}
+
+            <div class="container mt-5">
+                <div class="card border-0 shadow about-card">
+                    <div class="card-body mt-5 mb-2 mx-3 ">
+                        <h3 class="card-title">
+                            <span class="text-primary icon-hover"><i class="fa-solid fa-paperclip"></i></span>
+                            About us</h3>
+                        <p class="card-text fs-5 text-justify">
+                            Rubikamp's commitment is to create a leading online institution to nurture the next
+                            generation
+                            of talented youth technology leaders and entrepreneurs. Motivated, pragmatic and skilled
+                            teenagers who shape the future by solving real-world challenges. Rubikamp is a community of
+                            like-minded and goal-oriented teenagers and experienced and thoughtful people in the field
+                            of
+                            technology from all over the world who work together to raise the next generation. Rubikamp
+                            professors and mentors are from leading companies and universities in Iran and the world to
+                            make
+                            sure that Rubikamp teenagers get knowledge that is up-to-date and in line with the needs of
+                            leading companies. The educational path of Rubikamp, such as artificial intelligence,
+                            digital
+                            marketing, programming and entrepreneurship, has always been evolving and revised so that
+                            all
+                            educational items are integrated to increase efficiency and in line with the cultivation of
+                            a
+                            mentality of an efficient person and leader. We are committed to shaping the future of
+                            technology leaders and entrepreneurs, helping them push the boundaries and build a better
+                            future
+                            for everyone, regardless of their circumstances.
+                            <a href="https://rubikamp.org/">read more</a>
+                    </div>
+                    <div class="mb-4"
+                         style="width: 100%;  display: flex; align-items: center; justify-content: center;">
+                        <!--                    <img style="width: 400px;"  src="" class="card-img-bottom" alt="...">-->
+                    </div>
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </main>
+
+    {% include "includes/footer.html" %}
+
+    <script src="https://kit.fontawesome.com/a81368914c.js"></script>
+    <script src="{% static 'js/bootstrap.bundle.js' %}"></script>
+    <script src="{% static 'shared/app.js' %}"></script>
+
+{% endblock %}

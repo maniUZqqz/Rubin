@@ -1,0 +1,86 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}profile{% endblock %}
+
+{% block link %}
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+    <div class="min-h-screen bg-gray-100 py-10">
+        <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-xl p-8">
+            <h2 class="text-4xl font-bold text-gray-800 text-center mb-8">پروفایل کاربری</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <p class="text-gray-700"><strong>نام:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+                <p class="text-gray-700"><strong>ایمیل:</strong> {{ user.email }}</p>
+                <p class="text-gray-700"><strong>شماره تلفن:</strong> {{ user.phone_number }}</p>
+                <p class="text-gray-700"><strong>آدرس:</strong> {{ user.address }}</p>
+                <p class="text-gray-700"><strong>رشته:</strong> {{ user.major }}</p>
+                <p class="text-gray-700"><strong>تاریخ تولد:</strong> {{ user.birth_date }}</p>
+                <p class="text-gray-700"><strong>کد پستی:</strong> {{ user.postal_code }}</p>
+                <p class="text-gray-700"><strong>شغل پدر:</strong> {{ user.father_job }}</p>
+                <p class="text-gray-700"><strong>مقدار شهریه:</strong> {{ user.tuition_fee }}</p>
+                <p class="text-gray-700"><strong>نوع کاربر:</strong> {{ user.get_user_type_display }}</p>
+            </div>
+
+            <div class="text-center mt-8">
+                <a href="{% url 'edit_profile' %}"
+                   class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">ویرایش
+                    پروفایل</a>
+            </div>
+
+            {% if user.is_superuser %}
+                <div class="mt-10 border-t pt-6">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-4">آپلود فایل CSV یا Excel</h3>
+
+                    {% if messages %}
+                        <div class="mb-4">
+                            {% for message in messages %}
+                                <div class="p-4 rounded-lg
+                                    {% if message.tags == 'success' %}
+                                        bg-green-100 text-green-800
+                                    {% else %}
+                                        bg-red-100 text-red-800
+                                    {% endif %}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <form method="post" enctype="multipart/form-data" class="space-y-4">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit"
+                                class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">آپلود
+                            و پردازش
+                        </button>
+                    </form>
+
+                    <div class="mt-6 text-center">
+                        <a href="{% url 'admin_dashboard' %}" class="text-blue-600 hover:text-blue-800">dashboard</a>
+                    </div>
+                </div>
+                {% if files %}
+                    <div class="mt-10 border-t pt-6">
+                        <h3 class="text-2xl font-semibold text-gray-800 mb-4">فایل‌های آپلود شده</h3>
+                        <ul class="list-disc list-inside text-gray-700">
+                            {% for file in files %}
+                                <li>
+                                    <a href="{{ file.file.url }}" download
+                                       class="text-blue-600 hover:text-blue-800">{{ file.filename }}</a>
+                                    - {{ file.uploaded_at }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            {% endif %}
+
+        </div>
+    </div>
+{% endblock %}
+
+

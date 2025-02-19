@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8" />
+    <title>Dynamic Columns, CRUD & Search</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+            crossorigin="anonymous"
+    />
+
+    <!-- فونت Poppins از گوگل -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+            rel="preconnect"
+            href="https://fonts.gstatic.com"
+            crossorigin
+    >
+    <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+            rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="teachers-panel.css">
+</head>
+
+<body>
+<div class="container">
+    <h1 class="mb-3 text-center text-white fw-bold"></h1>
+
+    <!-- دکمه‌ها و فیلد جستجو در بالای جدول -->
+    <div class="row mb-4">
+        <div class="col-md-6 d-flex flex-wrap">
+            <a href="index.html" class="btn btn-secondary me-3 mb-2">بازگشت به پنل</a>
+            <!-- دکمه افزودن دانشجو -->
+            <button class="btn btn-add-student me-3 mb-2" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+                افزودن دانشجوی جدید
+            </button>
+            <!-- دکمه افزودن ستون جدید -->
+            <button class="btn btn-add-column mb-2" data-bs-toggle="modal" data-bs-target="#addColumnModal">
+                افزودن ستون جدید
+            </button>
+
+            <!-- NEW: دکمه دانلود CSV -->
+            <button class="btn btn-download-csv mb-2" onclick="downloadSheet()">
+                دانلود فایل CSV
+            </button>
+        </div>
+
+        <!-- فیلد جستجو -->
+        <div class="col-md-6 mb-2">
+            <div class="input-group">
+                <input
+                        type="text"
+                        class="form-control"
+                        placeholder="جستجو در دانشجویان..."
+                        id="searchInput"
+                        oninput="onSearchChange()"
+                />
+                <span class="input-group-text" id="basic-addon2">جستجو</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- جعبه جدول -->
+    <div class="table-container">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle mb-0">
+                <thead class="table-dark">
+                <tr id="tableHeaderRow">
+                    <!-- به‌صورت دینامیک از آرایه columns ساخته می‌شود -->
+                </tr>
+                </thead>
+                <tbody id="tableBody">
+                <!-- سطرها به‌صورت دینامیک ساخته می‌شوند -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- مودال افزودن ستون جدید -->
+<div
+        class="modal fade"
+        id="addColumnModal"
+        tabindex="-1"
+        aria-labelledby="addColumnModalLabel"
+        aria-hidden="true"
+>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addColumnModalLabel">افزودن ستون جدید</h5>
+                <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                ></button>
+            </div>
+            <div class="modal-body">
+                <form id="addColumnForm">
+                    <div class="mb-3">
+                        <label for="columnKey" class="form-label">نام فیلد (به انگلیسی بدون فاصله)</label>
+                        <input type="text" class="form-control" id="columnKey" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="columnLabel" class="form-label">عنوان ستون (برای نمایش)</label>
+                        <input type="text" class="form-control" id="columnLabel" required />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                >بستن</button>
+                <button
+                        type="button"
+                        class="btn btn-add-column"
+                        onclick="addNewColumn()"
+                >افزودن ستون</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال افزودن دانشجو -->
+<div
+        class="modal fade"
+        id="addStudentModal"
+        tabindex="-1"
+        aria-labelledby="addStudentModalLabel"
+        aria-hidden="true"
+>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addStudentModalLabel">افزودن دانشجوی جدید</h5>
+                <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                ></button>
+            </div>
+            <div class="modal-body" id="addStudentModalBody">
+                <!-- اینجا به‌صورت دینامیک ورودی‌ها را بر اساس ستون‌ها می‌سازیم -->
+            </div>
+            <div class="modal-footer">
+                <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                >بستن</button>
+                <button
+                        type="button"
+                        class="btn btn-success"
+                        onclick="saveNewStudent()"
+                >افزودن</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال ویرایش دانشجو -->
+<div
+        class="modal fade"
+        id="editStudentModal"
+        tabindex="-1"
+        aria-labelledby="editStudentModalLabel"
+        aria-hidden="true"
+>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editStudentModalLabel">ویرایش اطلاعات دانش‌آموز</h5>
+                <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                ></button>
+            </div>
+            <div class="modal-body" id="editStudentModalBody">
+                <!-- به‌صورت دینامیک ساخته می‌شود -->
+            </div>
+            <div class="modal-footer">
+                <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                >بستن</button>
+                <button
+                        type="button"
+                        class="btn btn-success"
+                        onclick="applyEditStudent()"
+                >ذخیره تغییرات</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- فوتر -->
+<footer>
+    <p>© 2025 | Dynamic Table Example (Add/Delete Columns/Students + Search)</p>
+</footer>
+
+<!-- اسکریپت بوت‌استرپ -->
+<script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"
+></script>
+
+<script src="teachers-panel.js"></script>
+</body>
+</html>

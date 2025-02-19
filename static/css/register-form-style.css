@@ -1,0 +1,262 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    padding: 30px;
+}
+
+.container {
+    position: relative;
+    max-width: 850px;
+    width: 100%;
+    background: #fff;
+    padding: 130px 30px;
+    box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.3);
+    perspective: 2700px;
+}
+
+.container .cover {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 100%;
+    width: 50%;
+    z-index: 98;
+    transition: all 1s ease;
+    transform-origin: left;
+    transform-style: preserve-3d;
+}
+
+.container #flip {
+    display: none;
+}
+
+.container #flip:checked ~ .cover {
+    transform: rotateY(-180deg);
+}
+
+.cover .front,
+.cover .back {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+}
+
+.cover .back {
+    transform: rotateY(180deg);
+    backface-visibility: hidden;
+}
+
+.cover img {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    z-index: 10;
+}
+
+.cover::before,
+.cover::after {
+    content: '';
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background: hsl(240, 1%, 14%);
+    opacity: 0.3;
+    z-index: 12;
+}
+
+.cover::after {
+    transform: rotateY(180deg);
+    backface-visibility: hidden;
+}
+
+.cover .text {
+    position: absolute;
+    z-index: 130;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.cover .text .text-1,
+.cover .text .text-2 {
+    font-size: 26px;
+    font-weight: 600;
+    color: #fff;
+    text-align: center;
+}
+
+.cover .text .text-2 {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.forms {
+    height: 100%;
+    width: 100%;
+    background: #fff;
+}
+
+.form-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.login-form,
+.signup-form {
+    width: calc(100% / 2 - 25px);
+}
+
+.title {
+    position: relative;
+    font-size: 24px;
+    font-weight: 500;
+    color: #333;
+}
+
+.title:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: 25px;
+    background: #162938;
+}
+
+.signup-form .title:before {
+    width: 20px;
+}
+
+.input-boxes {
+    margin-top: 10px;
+}
+
+.input-box {
+    display: flex;
+    align-items: center;
+    height: 50px;
+    width: 100%;
+    margin: 10px 0;
+    position: relative;
+}
+
+.input-box input,
+.input-box select {
+    height: 100%;
+    width: 100%;
+    outline: none;
+    border: none;
+    padding: 0 30px;
+    font-size: 16px;
+    font-weight: 500;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.input-box select {
+    background: transparent;
+    -webkit-appearance: none; /* حذف فلش پیش‌فرض در برخی مرورگرها */
+    appearance: none;
+    cursor: pointer;
+}
+
+.input-box select:focus,
+.input-box input:focus,
+.input-box select:valid,
+.input-box input:valid {
+    border-color: #162938;
+}
+
+.input-box i {
+    position: absolute;
+    color: #162938;
+    font-size: 17px;
+}
+
+.text {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+.text a {
+    text-decoration: none;
+}
+
+.text a:hover {
+    text-decoration: underline;
+}
+
+.button {
+    color: #fff;
+    margin-top: 40px;
+}
+
+.button button {
+    color: #fff;
+    background: #162938;
+    font-size: 18px;
+    border-radius: 6px;
+    padding: 12px;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.4s ease;
+}
+
+.button button:hover {
+    background: #0f2030;
+}
+
+/* ریسپانسیو */
+@media (max-width: 730px) {
+    .cover {
+        display: none;
+    }
+
+    .login-form {
+        width: 100%;
+    }
+}
+
+.alert-box {
+    display: none;
+}
+
+#forgotPassword-form,
+#otpVarification-form,
+#createNewPassword-form {
+    display: none;
+}
+
+a {
+    cursor: pointer;
+}
+
+#togglePassword {
+    position: absolute;
+    right: 0;
+    font-size: 18px;
+    margin-bottom: 5px;
+}

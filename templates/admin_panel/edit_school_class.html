@@ -1,0 +1,10 @@
+{% extends 'base/base.html' %}
+{% block title %}ویرایش کلاس{% endblock %}
+{% block body %}
+    <h2>ویرایش کلاس: {{ school_class.class_name }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">بروزرسانی</button>
+    </form>
+{% endblock %}

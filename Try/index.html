@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robin</title>
+    <style>
+
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazirmatn', sans-serif;
+            direction: rtl;
+        }
+
+        body {
+            background: #c5c9cf;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+
+        /* استایل سایدبار */
+        .sidebar {
+            width: 180px;
+            height: 400px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar ul li {
+            padding: 10px;
+            font-size: 16px;
+            color: #1e73da;
+            cursor: pointer;
+            transition: 0.3s;
+            border-radius: 5px;
+        }
+
+        .sidebar ul li.active {
+            background: #cfe2ff;
+        }
+
+        /* استایل محتوای اصلی */
+        .main {
+            width: 650px;
+            height: 400px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        /* استایل چت بات (داشبورد) */
+        .chat-header {
+            background: #1e73da;
+            padding: 10px;
+            border-radius: 10px 10px 0 0;
+            text-align: right;
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-header input {
+            flex: 1;
+            padding: 6px;
+            margin-right: 10px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+        }
+
+        .chat-messages {
+            height: 30vh;
+            flex: 1;
+            background: #f9f9f9;
+            border: 1px solid #d0d0d0;
+            border-radius: 5px;
+            padding: 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-message {
+            padding: 8px 12px;
+            border-radius: 20px;
+            max-width: 70%;
+            word-wrap: break-word;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .chat-message.sent {
+            background: #c8e6c9;
+            align-self: flex-end;
+        }
+
+        .chat-message.received {
+            background: #e1f5fe;
+            align-self: flex-start;
+        }
+
+        .chat-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .chat-options button {
+            padding: 6px 12px;
+            border: 1px solid #1e73da;
+            background: white;
+            color: #1e73da;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .chat-input {
+            margin-top: 10px;
+            display: flex;
+            border-top: 1px solid #ddd;
+            padding: 8px 0;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #aaa;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .chat-input button {
+            padding: 8px 15px;
+            border: none;
+            background: #1e73da;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        /* استایل بخش کمپ */
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab {
+            cursor: pointer;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: #1e73da;
+        }
+
+        .tab.active {
+            border-bottom: 2px solid #1e73da;
+            font-weight: bold;
+        }
+
+        .content {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        .add-button {
+            background: #1e73da;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .card {
+            background: #d0e1ff;
+            padding: 10px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        .card .info {
+            flex: 1;
+        }
+
+        .card .avatar {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .menu-icon {
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        /* مدال */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            text-align: right;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            border: 1px solid #aaa;
+            border-radius: 5px;
+        }
+
+        .modal-content button {
+            padding: 8px 12px;
+            border: none;
+            background: #1e73da;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* ریسپانسیو */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .main, .sidebar {
+                width: 100%;
+                height: auto;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="main" id="mainContent">
+        <!-- بخش داشبورد (چت بات) -->
+        <div id="dashboard" style="display: block;">
+            <div class="chat-header">
+                <input type="text" placeholder="جست و جو کن">
+                🔍
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <!-- پیام‌ها در اینجا نمایش داده می‌شوند -->
+            </div>
+            <div class="chat-options">
+                <button>گزارش کلاس ها</button>
+                <button>گزارش وضعیت افراد</button>
+                <button>گزارش مدرسه</button>
+                <button>ارسال پیامک</button>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="سوال خود رو میتونید در اینجا بنویسید">
+                <button id="sendBtn">ارسال</button>
+            </div>
+        </div>
+
+        <!-- بخش کلاس‌ها -->
+        <div id="classes" style="display: none;">
+            <div class="chat-header">
+                <input type="text" placeholder="جست و جو کن">
+                🔍
+            </div>
+            <div class="tabs">
+                <div class="tab" data-section="class1">کلاس 1</div>
+                <div class="tab" data-section="class2">کلاس 2</div>
+                <div class="tab" data-section="class3">کلاس 3</div>
+                <button class="add-button" id="addClassButton">➕ اضافه کردن کلاس</button>
+            </div>
+
+            <!-- محتوای کلاس‌ها -->
+            <div class="content" id="class1" style="display: none;">
+                <div class="cards">
+                    <div class="card">
+                        <div class="info">
+                            <strong>کلاس 1</strong>
+                            <p>استاد: احمدی</p>
+                            <p>وضعیت: باز</p>
+                        </div>
+                        <div class="menu-icon">⋮</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="class2" style="display: none;">
+                <div class="cards">
+                    <div class="card">
+                        <div class="info">
+                            <strong>کلاس 2</strong>
+                            <p>استاد: احمدی</p>
+                            <p>وضعیت: باز</p>
+                        </div>
+                        <div class="menu-icon">⋮</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="class3" style="display: none;">
+                <div class="cards">
+                    <div class="card">
+                        <div class="info">
+                            <strong>کلاس 3</strong>
+                            <p>استاد: احمدی</p>
+                            <p>وضعیت: باز</p>
+                        </div>
+                        <div class="menu-icon">⋮</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- بخش کمپ -->
+        <div id="camp" style="display: none;">
+            <div class="chat-header">
+                <input type="text" placeholder="جست و جو کن">
+                🔍
+            </div>
+            <div class="tabs">
+                <div class="tab" data-section="students">دانش آموزان</div>
+                <div class="tab" data-section="teachers">اساتید</div>
+                <div class="tab active" data-section="advisors">مشاورین</div>
+                <button class="add-button" id="addButton">➕ اضافه کردن</button>
+            </div>
+
+            <!-- محتوای دانش‌آموزان -->
+            <div class="content" id="students" style="display: none;">
+                <div class="cards">
+                    <div class="card" data-student-id="1">
+                        <div class="avatar">
+                            <img class="avatar" src="download%20(1).jpeg" alt="">
+                        </div>
+                        <div class="info">
+                            <strong>نام دانش آموز</strong>
+                            <p>دانش آموز فرانت کلاس ۲</p>
+                        </div>
+                        <div class="menu-icon">⋮</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- محتوای اساتید -->
+            <div class="content" id="teachers" style="display: none;">
+                <div class="cards">
+                    <div class="card">
+                        <div class="avatar">
+                            <img class="avatar" src="download%20(1).jpeg" alt="">
+                        </div>
+                        <div class="info">
+                            <strong>نام استاد</strong>
+                            <p>استاد فرانت کلاس ۲</p>
+                        </div>
+                        <div class="menu-icon">⋮</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- محتوای مشاورین -->
+            <div class="content" id="advisors" style="display: block;">
+                <div class="cards">
+                    <div class="card">
+                        <div class="avatar">
+                            <img class="avatar" src="download%20(1).jpeg" alt="">
+                        </div>
+                        <div class="info">
+                            <strong>نام مشاور</strong>
+                            <p>مشاور فرانت کلاس ۲</p>
+                        </div>
+                        <div class="menu-icon">⋮</div>
+                    </div>
+                <div class="card">
+        <div class="avatar">
+          <img class="avatar" src="download%20(1).jpeg" alt="">
+        </div>
+        <div class="info">
+          <strong>jjjjjjj</strong>
+          <p>jjjjjjj</p>
+        </div>
+        <div class="menu-icon">⋮</div>
+      </div></div>
+            </div>
+        </div>
+    </div>
+
+<script>
+
+    // تغییر فعال بودن تب‌های سایدبار
+    document.querySelectorAll(".sidebar ul li").forEach(tab => {
+        tab.addEventListener("click", function () {
+            document.querySelectorAll(".sidebar ul li").forEach(item => item.classList.remove("active"));
+            this.classList.add("active");
+
+            document.getElementById("dashboard").style.display = this.dataset.tab === "dashboard" ? "block" : "none";
+            document.getElementById("classes").style.display = this.dataset.tab === "classes" ? "block" : "none";
+            document.getElementById("camp").style.display = this.dataset.tab === "camp" ? "block" : "none";
+        });
+    });
+
+    // عملکرد چت بات
+    const sendBtn = document.getElementById('sendBtn');
+    const chatInput = document.getElementById('chatInput');
+    const chatMessages = document.getElementById('chatMessages');
+
+    function appendMessage(text, type) {
+        const msgDiv = document.createElement('div');
+        msgDiv.classList.add('chat-message', type);
+        msgDiv.textContent = text;
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    sendBtn.addEventListener('click', () => {
+        const text = chatInput.value.trim();
+        if (text !== "") {
+            appendMessage(text, 'sent');
+            chatInput.value = "";
+            setTimeout(() => {
+                appendMessage("پاسخ چت بات: " + text, 'received');
+            }, 1000);
+        }
+    });
+
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendBtn.click();
+        }
+    });
+
+    // تغییر محتوای سربرگ‌های کمپ و کلاس‌ها
+    document.querySelectorAll(".tabs .tab").forEach(tab => {
+        tab.addEventListener("click", function () {
+            // حذف کلاس active از همه تب‌ها
+            document.querySelectorAll(".tabs .tab").forEach(item => item.classList.remove("active"));
+            // اضافه کردن کلاس active به تب انتخاب شده
+            this.classList.add("active");
+
+            // مخفی کردن همه بخش‌های محتوا
+            const parent = this.closest('.main').querySelectorAll(".content");
+            parent.forEach(content => {
+                content.style.display = "none";
+            });
+
+            // نمایش بخش محتوای مرتبط با تب انتخاب شده
+            const sectionId = this.dataset.section;
+            document.getElementById(sectionId).style.display = "block";
+        });
+    });
+
+    // عملکرد مدال و اضافه کردن کاربر
+    const addButton = document.getElementById('addButton');
+    const addModal = document.getElementById('addModal');
+    const submitUser = document.getElementById('submitUser');
+    const closeModal = document.getElementById('closeModal');
+
+    addButton.addEventListener('click', () => {
+        addModal.style.display = 'flex';
+    });
+
+    closeModal.addEventListener('click', () => {
+        addModal.style.display = 'none';
+    });
+
+    submitUser.addEventListener('click', () => {
+        const userName = document.getElementById('userName').value.trim();
+        const userRole = document.getElementById('userRole').value.trim();
+
+        if (userName && userRole) {
+            const activeTab = document.querySelector('.tabs .tab.active');
+            const sectionId = activeTab.dataset.section;
+            const section = document.getElementById(sectionId);
+
+            const newCard = document.createElement('div');
+            newCard.classList.add('card');
+            newCard.innerHTML = `
+        <div class="avatar">
+          <img class="avatar" src="download%20(1).jpeg" alt="">
+        </div>
+        <div class="info">
+          <strong>${userName}</strong>
+          <p>${userRole}</p>
+        </div>
+        <div class="menu-icon">⋮</div>
+      `;
+
+            section.querySelector('.cards').appendChild(newCard);
+            addModal.style.display = 'none';
+            document.getElementById('userName').value = '';
+            document.getElementById('userRole').value = '';
+        }
+    });
+
+    // عملکرد مدال و اضافه کردن کلاس
+    const addClassButton = document.getElementById('addClassButton');
+    const addClassModal = document.getElementById('addClassModal');
+    const submitClass = document.getElementById('submitClass');
+    const closeClassModal = document.getElementById('closeClassModal');
+
+    addClassButton.addEventListener('click', () => {
+        addClassModal.style.display = 'flex';
+    });
+
+    closeClassModal.addEventListener('click', () => {
+        addClassModal.style.display = 'none';
+    });
+
+    submitClass.addEventListener('click', () => {
+        const className = document.getElementById('className').value.trim();
+        const classTeacher = document.getElementById('classTeacher').value.trim();
+        const classStatus = document.getElementById('classStatus').value.trim();
+
+        if (className && classTeacher && classStatus) {
+            const newClassCard = document.createElement('div');
+            newClassCard.classList.add('card');
+            newClassCard.innerHTML = `
+        <div class="info">
+          <strong>${className}</strong>
+          <p>استاد: ${classTeacher}</p>
+          <p>وضعیت: ${classStatus}</p>
+        </div>
+        <div class="menu-icon">⋮</div>
+      `;
+
+            const activeTab = document.querySelector('.tabs .tab.active');
+            const sectionId = activeTab.dataset.section;
+            const section = document.getElementById(sectionId);
+            section.querySelector('.cards').appendChild(newClassCard);
+
+            addClassModal.style.display = 'none';
+            document.getElementById('className').value = '';
+            document.getElementById('classTeacher').value = '';
+            document.getElementById('classStatus').value = '';
+        }
+    });
+
+    // عملکرد مدال اطلاعات دانش‌آموز
+    const studentModal = document.getElementById('studentModal');
+    const closeStudentModal = document.getElementById('closeStudentModal');
+
+    document.querySelectorAll('.card[data-student-id]').forEach(card => {
+        card.addEventListener('click', () => {
+            const studentName = card.querySelector('.info strong').textContent;
+            const studentClass = card.querySelector('.info p').textContent;
+
+            document.getElementById('studentName').textContent = studentName;
+            document.getElementById('studentClass').textContent = studentClass;
+            document.getElementById('studentStatus').textContent = 'فعال'; // می‌توانید وضعیت را از دیتابیس یا جاهای دیگر بگیرید
+
+            studentModal.style.display = 'flex';
+        });
+    });
+
+    closeStudentModal.addEventListener('click', () => {
+        studentModal.style.display = 'none';
+    });
+
+</script>
+</body>
+</html>

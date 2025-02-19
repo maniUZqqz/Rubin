@@ -1,0 +1,113 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}register{% endblock %}
+
+{% block link %}
+
+    <!-- Fontawesome CDN Link -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css"/>
+    <!-- css -->
+    <link rel="stylesheet" href="{% static 'css/register-form-style.css' %}">
+
+{% endblock %}
+
+{% block body %}
+
+    <div class="container">
+        <input type="checkbox" id="flip">
+        <div class="cover">
+            <div class="front">
+                <img src="{% static 'images/background_img.jpg' %}" alt="">
+                <div class="text">
+                    <span class="text-1">Rubikamp Register<br></span>
+                    <span class="text-2"></span>
+                </div>
+            </div>
+        </div>
+        <div class="forms">
+            <div class="form-content">
+                <div class="login-form">
+                    <div class="title" id='board-title'>Register</div>
+
+                    <!-- نمایش پیام‌های خطا -->
+                    {% if messages %}
+                        <div class="alert-box">
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} text-center mt-3" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- فرم ثبت نام -->
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="input-boxes">
+                            <!-- نام کاربری -->
+                            <div class="input-box">
+                                <i class="fas fa-user"></i>
+                                {{ form.username }}
+                            </div>
+
+                            <!-- ایمیل -->
+                            <div class="input-box">
+                                <i class="fas fa-envelope"></i>
+                                {{ form.email }}
+                            </div>
+
+                            <!-- رمز عبور -->
+                            <div class="input-box">
+                                <i class="fas fa-lock"></i>
+                                {{ form.password1 }}
+                                <i class="bi bi-eye-fill" style="margin-left:auto;margin-right: 6px;"
+                                   id="togglePassword"></i>
+                            </div>
+
+                            <!-- تکرار رمز عبور -->
+                            <div class="input-box">
+                                <i class="fas fa-lock"></i>
+                                {{ form.password2 }}
+                            </div>
+
+                            <!-- انتخاب نقش -->
+                            <div class="input-box">
+                                <i class="fas fa-user"></i>
+                                {{ form.user_type }}
+                            </div>
+
+                            <!-- نمایش خطاهای فرم -->
+                            {% for field in form %}
+                                {% if field.errors %}
+                                    <div class="alert alert-danger">
+                                        {{ field.errors }}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+
+                            <!-- لینک ورود -->
+                            <div class="text"><a href="{% url 'login' %}">Already have an account?</a></div>
+
+                            <!-- دکمه ثبت نام -->
+                            <div class="button input-box">
+                                <button type="submit" class="btn">Submit</button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- فایل JS اصلی شما -->
+    <script src="{% static 'js/login.js' %}"></script>
+
+
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}آپلود فایل{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h2>آپلود فایل CSV یا Excel</h2>
+
+    <!-- نمایش پیام‌های موفقیت و خطا -->
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- فرم آپلود فایل -->
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="fileInput" class="form-label">انتخاب فایل (CSV یا Excel)</label>
+            {{ form.file }}
+        </div>
+        <button type="submit" class="btn btn-primary">آپلود و پردازش</button>
+    </form>
+
+    <br>
+    <a href="{% url 'profile_view' %}" class="btn btn-secondary">بازگشت به پروفایل</a>
+</div>
+
+<!-- استایل ساده برای نمایش بهتر فرم -->
+<style>
+    .container {
+        max-width: 600px;
+        margin-top: 50px;
+    }
+    .messages {
+        margin-bottom: 20px;
+    }
+</style>
+
+{% endblock %}
