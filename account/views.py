@@ -155,7 +155,7 @@ class CustomLoginView(LoginView):
 
 
 # صفحه پروفایل کاربر
-qqz = "RubiCode"
+qqz = "Rubi Code"
 @login_required
 def profile_view(request):
     files = UploadedFile.objects.all()
