@@ -1,28 +1,108 @@
 {% extends 'base/base.html' %}
 {% load static %}
 
-{% block title %}profile{% endblock %}
+{% block title %}پروفایل کاربری{% endblock %}
 
 {% block link %}
+    <link href="https://fonts.googleapis.com/css2?family=Vazir:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* فونت و استایل کلی */
+        body {
+            font-family: 'Vazir', sans-serif;
+        }
+
+        /* حالت دارک مود */
+        .dark-mode {
+            background-color: #1a202c;
+            color: #f7fafc;
+        }
+
+        .dark-mode .bg-white {
+            background-color: #2d3748;
+        }
+
+        .dark-mode .text-gray-800 {
+            color: #edf2f7;
+        }
+
+        .dark-mode .border-gray-300 {
+            border-color: #4A5568;
+        }
+
+        .dark-mode table {
+            background-color: #2d3748;
+            border-color: #4A5568;
+        }
+
+        .dark-mode th {
+            background-color: #4A5568;
+            color: #f7fafc;
+        }
+
+        .dark-mode td {
+            color: #e2e8f0;
+        }
+    </style>
 {% endblock %}
 
 {% block body %}
-    <div class="min-h-screen bg-gray-100 py-10">
-        <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-xl p-8">
-            <h2 class="text-4xl font-bold text-gray-800 text-center mb-8">پروفایل کاربری</h2>
+    <div class="min-h-screen bg-gray-100 dark:bg-gray-900 py-10">
+        <div class="max-w-5xl mx-auto bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8">
+            <h2 class="text-4xl font-bold text-gray-800 dark:text-white text-center mb-8">پروفایل کاربری</h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <p class="text-gray-700"><strong>نام:</strong> {{ user.first_name }} {{ user.last_name }}</p>
-                <p class="text-gray-700"><strong>ایمیل:</strong> {{ user.email }}</p>
-                <p class="text-gray-700"><strong>شماره تلفن:</strong> {{ user.phone_number }}</p>
-                <p class="text-gray-700"><strong>آدرس:</strong> {{ user.address }}</p>
-                <p class="text-gray-700"><strong>رشته:</strong> {{ user.major }}</p>
-                <p class="text-gray-700"><strong>تاریخ تولد:</strong> {{ user.birth_date }}</p>
-                <p class="text-gray-700"><strong>کد پستی:</strong> {{ user.postal_code }}</p>
-                <p class="text-gray-700"><strong>شغل پدر:</strong> {{ user.father_job }}</p>
-                <p class="text-gray-700"><strong>مقدار شهریه:</strong> {{ user.tuition_fee }}</p>
-                <p class="text-gray-700"><strong>نوع کاربر:</strong> {{ user.get_user_type_display }}</p>
+            <!-- نمایش اطلاعات کاربری در جدول -->
+            <div class="overflow-x-auto">
+                <table class="w-full border border-gray-300 rounded-lg shadow-md">
+                    <thead>
+                        <tr class="bg-gray-200 dark:bg-gray-700">
+                            <th class="border border-gray-300 p-3 text-gray-800 dark:text-white">مشخصه</th>
+                            <th class="border border-gray-300 p-3 text-gray-800 dark:text-white">مقدار</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border border-gray-300 p-3 text-gray-700 dark:text-gray-300">نام</td>
+                            <td class="border border-gray-300 p-3">{{ user.first_name }} {{ user.last_name }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 p-3">ایمیل</td>
+                            <td class="border border-gray-300 p-3">{{ user.email }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 p-3">شماره تلفن</td>
+                            <td class="border border-gray-300 p-3">{{ user.phone_number }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 p-3">آدرس</td>
+                            <td class="border border-gray-300 p-3">{{ user.address }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 p-3">رشته</td>
+                            <td class="border border-gray-300 p-3">{{ user.major }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 p-3">تاریخ تولد</td>
+                            <td class="border border-gray-300 p-3">{{ user.birth_date }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 p-3">کد پستی</td>
+                            <td class="border border-gray-300 p-3">{{ user.postal_code }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 p-3">شغل پدر</td>
+                            <td class="border border-gray-300 p-3">{{ user.father_job }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 p-3">مقدار شهریه</td>
+                            <td class="border border-gray-300 p-3">{{ user.tuition_fee }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 p-3">نوع کاربر</td>
+                            <td class="border border-gray-300 p-3">{{ user.get_user_type_display }}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
             <div class="text-center mt-8">
@@ -33,54 +113,53 @@
 
             {% if user.is_superuser %}
                 <div class="mt-10 border-t pt-6">
-                    <h3 class="text-2xl font-semibold text-gray-800 mb-4">آپلود فایل CSV یا Excel</h3>
-
-                    {% if messages %}
-                        <div class="mb-4">
-                            {% for message in messages %}
-                                <div class="p-4 rounded-lg
-                                    {% if message.tags == 'success' %}
-                                        bg-green-100 text-green-800
-                                    {% else %}
-                                        bg-red-100 text-red-800
-                                    {% endif %}">
-                                    {{ message }}
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
+                    <h3 class="text-2xl font-semibold text-gray-800 dark:text-white mb-4">آپلود فایل CSV یا Excel</h3>
 
                     <form method="post" enctype="multipart/form-data" class="space-y-4">
                         {% csrf_token %}
                         {{ form.as_p }}
                         <button type="submit"
-                                class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">آپلود
-                            و پردازش
+                                class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">آپلود و پردازش
                         </button>
+
+<div class="mt-6 text-center">
+    <a href="{% url 'admin_dashboard' %}"
+       class="inline-block bg-indigo-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md
+              hover:bg-indigo-700 transition duration-300 ease-in-out">
+        dashboard
+    </a>
+</div>
+
+
+
                     </form>
 
-                    <div class="mt-6 text-center">
-                        <a href="{% url 'admin_dashboard' %}" class="text-blue-600 hover:text-blue-800">dashboard</a>
-                    </div>
+                    {% if files %}
+                        <div class="mt-10 border-t pt-6">
+                            <h3 class="text-2xl font-semibold text-gray-800 dark:text-white mb-4">فایل‌های آپلود شده</h3>
+                            <ul class="list-disc list-inside text-gray-700 dark:text-gray-300">
+                                {% for file in files %}
+                                    <li>
+                                        <a href="{{ file.file.url }}" download
+                                           class="text-blue-600 hover:text-blue-800">{{ file.filename }}</a>
+                                        - {{ file.uploaded_at }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
                 </div>
-                {% if files %}
-                    <div class="mt-10 border-t pt-6">
-                        <h3 class="text-2xl font-semibold text-gray-800 mb-4">فایل‌های آپلود شده</h3>
-                        <ul class="list-disc list-inside text-gray-700">
-                            {% for file in files %}
-                                <li>
-                                    <a href="{{ file.file.url }}" download
-                                       class="text-blue-600 hover:text-blue-800">{{ file.filename }}</a>
-                                    - {{ file.uploaded_at }}
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                {% endif %}
             {% endif %}
-
         </div>
     </div>
+
+    <!-- دکمه تغییر دارک مود -->
+    <button class="bg-gray-600 text-white rounded-full p-3 fixed top-5 right-5 shadow-lg hover:bg-gray-700"
+            onclick="toggleDarkMode()">🌙</button>
+
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+    </script>
 {% endblock %}
-
-

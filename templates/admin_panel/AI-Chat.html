@@ -8,122 +8,210 @@
     <link rel="stylesheet" href="{% static 'css/AI-Chat.css' %}">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            font-family: 'Vazir', sans-serif;
+            background: #f1f3f6;
             margin: 0;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .container {
-            width: 90%;
-            max-width: 400px;
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 95%;
+            margin-top: 10vh;
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             text-align: center;
+            overflow: hidden;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         h1 {
             color: #333;
-            font-size: 20px;
-            margin-bottom: 15px;
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .chat-window {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
         }
 
         .chat-message {
-            padding: 10px;
-            margin: 8px 0;
-            border-radius: 8px;
-            font-size: 14px;
-            line-height: 1.6;
+            padding: 12px 18px;
+            margin: 10px 0;
+            border-radius: 20px;
+            font-size: 16px;
+            line-height: 1.8;
             max-width: 80%;
             display: inline-block;
             animation: fadeIn 0.3s ease-in-out;
+            word-wrap: break-word;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .sent {
-            background: #007bff;
+            background: #4CAF50;
             color: white;
             align-self: flex-end;
             text-align: right;
+            border-radius: 20px 20px 0 20px;
         }
 
         .received {
-            background: #eaeaea;
-            color: black;
+            background: #f0f0f5;
+            color: #333;
             text-align: left;
+            border-radius: 20px 20px 20px 0;
         }
 
         .error-message {
-            color: red;
+            color: #f44336;
             font-size: 14px;
-            margin-top: 10px;
+            margin-top: 15px;
         }
 
-        form {
-            margin-top: 15px;
+        .form-container {
             display: flex;
-            gap: 8px;
+            gap: 12px;
+            justify-content: center;
         }
 
         input[type="text"] {
             flex: 1;
-            padding: 10px;
+            width: 45.2vw;
+            padding: 12px;
             border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         button {
             background: #28a745;
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 6px;
+            padding: 12px 18px;
+            border-radius: 8px;
             cursor: pointer;
             transition: 0.3s;
         }
 
-        button:hover {
-            background: #218838;
+        .toggle-theme {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        /* Dark mode styles */
+        .dark-mode {
+            background: #222;
+            color: #f1f3f6;
+        }
+
+        .dark-mode .container {
+            background: #333;
+        }
+
+        .dark-mode .chat-message {
+            background: #444;
+            color: #f1f3f6;
+        }
+
+        .dark-mode .sent {
+            background: #45a049;
+        }
+
+        .dark-mode .received {
+            background: #3a3a3a;
+        }
+
+        .dark-mode .form-container input {
+            background-color: #444;
+            color: #f1f3f6;
+            border-color: #666;
+        }
+
+        .dark-mode .form-container button {
+            background: #008CBA;
+        }
+
+        .dark-mode .form-container button:hover {
+            background: #007B9E;
+        }
+
+        /* Title color for dark mode */
+        .dark-mode h1 {
+            color: #f1f3f6;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
     </style>
 </head>
 <body>
+    <button class="toggle-theme" onclick="toggleTheme()">🌙</button>
+
     <div class="container">
         <h1>چت با هوش مصنوعی</h1>
 
-        {% if question %}
-            <div class="chat-message sent">
-                <p><strong>شما:</strong> {{ question }}</p>
-            </div>
-        {% endif %}
+        <div class="chat-window">
+            {% if question %}
+                <div class="chat-message sent">
+                    <p><strong>شما:</strong> {{ question }}</p>
+                </div>
+            {% endif %}
 
-        {% if answer %}
-            <div class="chat-message received">
-                <p><strong>هوش مصنوعی:</strong> {{ answer }}</p>
-            </div>
-        {% endif %}
+            {% if answer %}
+                <div class="chat-message received">
+                    <p><strong>هوش مصنوعی:</strong> {{ answer }}</p>
+                </div>
+            {% endif %}
 
-        {% if error %}
-            <div class="error-message">
-                <p>{{ error }}</p>
-            </div>
-        {% endif %}
+            {% if error %}
+                <div class="error-message">
+                    <p>{{ error }}</p>
+                </div>
+            {% endif %}
+        </div>
 
-        <form method="POST" action="{% url 'chat_with_ai' %}">
-            {% csrf_token %}
-            <input type="text" name="question" placeholder="سوال خود را اینجا بنویسید..." required>
-            <button type="submit">ارسال</button>
-        </form>
+        <div class="form-container">
+            <form method="POST" action="{% url 'chat_with_ai' %}">
+                {% csrf_token %}
+                <input type="text" name="question" placeholder="سوال خود را اینجا بنویسید..." required>
+                <button type="submit">ارسال</button>
+            </form>
+        </div>
     </div>
+
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle("dark-mode");
+            const themeIcon = document.querySelector(".toggle-theme");
+            const title = document.querySelector("h1");
+
+            if (document.body.classList.contains("dark-mode")) {
+                themeIcon.textContent = "🌞";
+                title.style.color = "#f1f3f6"; // Light color for dark mode
+            } else {
+                themeIcon.textContent = "🌙";
+                title.style.color = "#333"; // Dark color for light mode
+            }
+        }
+    </script>
 </body>
 </html>
