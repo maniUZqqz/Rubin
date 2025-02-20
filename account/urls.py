@@ -5,7 +5,7 @@ from .views import (
     profile_view, edit_profile_view,
     forgot_password_view, verify_otp_view, reset_password_view, admin_dashboard,
     add_student_view, edit_student_view, delete_student_view, add_dynamic_column, add_school_class,
-    edit_school_class, delete_school_class, chat_with_ai, reset_chat  # اضافه کردن این خط
+    edit_school_class, delete_school_class, chat_with_ai, reset_chat, student_detail_view  # اضافه کردن این خط
 )
 
 urlpatterns = [
@@ -27,4 +27,5 @@ urlpatterns = [
     path('delete-school-class/<int:class_id>/', delete_school_class, name='delete_school_class'),
     path('chat/', chat_with_ai, name='chat_with_ai'),
     path('chat/reset/', reset_chat, name='reset_chat'),
+    path('student/<int:student_id>/', student_detail_view, name='student_detail'),
 ]

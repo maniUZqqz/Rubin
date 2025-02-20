@@ -1,3 +1,4 @@
+# views.py
 import csv
 import random
 import pandas as pd
@@ -171,9 +172,6 @@ class CustomLoginView(LoginView):
 
 
 # صفحه پروفایل کاربر
-qqz = "Rubi Code"
-
-
 @login_required
 def profile_view(request):
     files = UploadedFile.objects.all()
@@ -313,6 +311,71 @@ def admin_dashboard(request):
     }
     return render(request, "admin_panel/dashboard.html", context)
 
+
+def student_detail_view(request, student_id):
+    student = get_object_or_404(Student, id=student_id)
+
+    # چت بات هوش مصنوعی مخصوص این دانش‌آموز
+    if request.method == 'POST':
+        try:
+            question = request.POST.get('question')
+            conversation_history = request.session.get(f'conversation_history_{student_id}', [])
+
+            # ساخت context با اطلاعات دانش‌آموز
+            context = (
+                f"{student.full_name}: "
+                f"سن: {student.age}, "
+                f"رشته: {student.major}, "
+                f"وضعیت در روبیکمپ: {student.path}, "
+                f"شغل پدر: {student.father_job}, "
+                f"آدرس: {student.address}, "
+                f"کد ملی: {student.national_code}, "
+                f"کد پستی: {student.postal_code}, "
+                f"تاریخ تولد: {student.birth_date}, "
+                f"توضیحات: {student.Description}, "
+                f"مهارت ها: {student.skill}"
+            )
+
+            system_prompt = f"""
+            شما یک دستیار هوشمند هستید که فقط بر اساس متن زیر به سوالات پاسخ می‌دهید:
+            متن:
+            {context}
+
+            - اگر جواب در متن وجود نداشت، فقط بنویسید: "جواب پیدا نشد".
+            - خارج از متن نظری ندید.
+            - پاسخ‌ها کوتاه و دقیق باشند.
+            """
+
+            if not conversation_history:
+                conversation_history.append({"role": "system", "content": system_prompt})
+
+            conversation_history.append({"role": "user", "content": question})
+
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=conversation_history
+            )
+
+            answer = response.choices[0].message.content.strip()
+            conversation_history.append({"role": "assistant", "content": answer})
+
+            request.session[f'conversation_history_{student_id}'] = conversation_history
+
+            return render(request, 'admin_panel/student_detail.html', {
+                'student': student,
+                'conversation_history': conversation_history
+            })
+
+        except Exception as e:
+            return render(request, 'admin_panel/student_detail.html', {
+                'student': student,
+                'error': str(e)
+            })
+
+    return render(request, 'admin_panel/student_detail.html', {
+        'student': student,
+        'conversation_history': request.session.get(f'conversation_history_{student_id}', [])
+    })
 
 # def process_file(file_path, uploaded_file):
 #     if file_path.endswith('.csv'):
@@ -569,6 +632,7 @@ def edit_student_view(request, student_id):
         'forms': forms,
     }
     return render(request, 'admin_panel/edit_student.html', context)
+
 
 
 def delete_student_view(request, student_id):

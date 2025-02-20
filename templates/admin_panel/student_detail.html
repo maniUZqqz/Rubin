@@ -1,0 +1,45 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}جزئیات دانش‌آموز{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h2>جزئیات دانش‌آموز: {{ student.full_name }}</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <h4>اطلاعات شخصی</h4>
+                <p><strong>سن:</strong> {{ student.age }}</p>
+                <p><strong>رشته:</strong> {{ student.major }}</p>
+                <p><strong>شغل پدر:</strong> {{ student.father_job }}</p>
+                <p><strong>مسیر:</strong> {{ student.path }}</p>
+                <p><strong>آدرس:</strong> {{ student.address }}</p>
+                <p><strong>کد ملی:</strong> {{ student.national_code }}</p>
+                <p><strong>کد پستی:</strong> {{ student.postal_code }}</p>
+                <p><strong>تاریخ تولد:</strong> {{ student.birth_date }}</p>
+                <p><strong>توضیحات:</strong> {{ student.Description }}</p>
+                <p><strong>مهارت‌ها:</strong> {{ student.skill }}</p>
+            </div>
+            <div class="col-md-6">
+                <h4>چت با هوش مصنوعی</h4>
+                <div class="mt-4">
+                    {% for message in conversation_history %}
+                        {% if message.role == "user" or message.role == "assistant" %}
+                            <div class="mb-2">
+                                <strong>{{ message.role }}:</strong> {{ message.content }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="question">سوال خود را بپرسید:</label>
+                        <input type="text" id="question" name="question" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-2">ارسال</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
