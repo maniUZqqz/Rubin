@@ -576,14 +576,39 @@ def process_file(file_path, uploaded_file):
     return df.to_html(index=False)
 
 
-# ==================================================
 
 def add_student_view(request):
     if request.method == 'POST':
         form = StudentForm(request.POST)
         if form.is_valid():
-            form.save()
+            student = form.save()  # ذخیره دانش‌آموز در دیتابیس اصلی
             messages.success(request, "دانش‌آموز با موفقیت اضافه شد!")
+
+            # ترکیب اطلاعات دانش‌آموز در یک رشته
+            student_info = (
+                f"نام و نام خانوادگی: {student.full_name}, "
+                f"سن: {student.age}, "
+                f"رشته: {student.major}, "
+                f"شغل پدر: {student.father_job}, "
+                f"مسیر: {student.path}, "
+                f"آدرس: {student.address}, "
+                f"کد ملی: {student.national_code}, "
+                f"کد پستی: {student.postal_code}, "
+                f"تاریخ تولد: {student.birth_date}"
+            )
+
+            # تولید امبدینگ برای اطلاعات دانش‌آموز
+            embedding = generate_embedding(student_info)
+
+            # ذخیره‌سازی در Pinecone
+            vector_id = f"student_{student.id}"  # آیدی منحصر به‌فرد برای بردار
+            metadata = {
+                "full_name": student.full_name,
+                "national_code": student.national_code,
+                "birth_date": student.birth_date.strftime("%Y-%m-%d")
+            }
+            save_to_pinecone(vector_id, embedding, metadata)
+
             return redirect('admin_dashboard')
     else:
         form = StudentForm()
