@@ -16,13 +16,13 @@
 
         .container {
             width: 95%;
-            margin-top: 10vh;
+            max-width: 600px;
+            margin: 10vh auto;
             background: #fff;
-            padding: 30px;
+            padding: 20px;
             border-radius: 15px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             text-align: center;
-            overflow: hidden;
             transition: background 0.3s ease, color 0.3s ease;
         }
 
@@ -38,10 +38,12 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            margin-bottom: 20px;
             max-height: 400px;
             overflow-y: auto;
-            padding-right: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9f9f9;
         }
 
         .chat-message {
@@ -49,10 +51,9 @@
             margin: 10px 0;
             border-radius: 20px;
             font-size: 16px;
-            line-height: 1.8;
+            line-height: 1.6;
             max-width: 80%;
             display: inline-block;
-            animation: fadeIn 0.3s ease-in-out;
             word-wrap: break-word;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
@@ -80,14 +81,14 @@
 
         .form-container {
             display: flex;
+            margin-top: 15px;
             gap: 12px;
             justify-content: center;
         }
 
         input[type="text"] {
             flex: 1;
-            width: 45.2vw;
-            padding: 12px;
+            padding: 10px;
             border: 1px solid #ccc;
             border-radius: 8px;
             font-size: 16px;
@@ -98,10 +99,22 @@
             background: #28a745;
             color: white;
             border: none;
-            padding: 12px 18px;
+            padding: 10px 15px;
             border-radius: 8px;
             cursor: pointer;
             transition: 0.3s;
+        }
+
+        button:hover {
+            background: #218838;
+        }
+
+        .reset-button {
+            background: #dc3545;
+        }
+
+        .reset-button:hover {
+            background: #c82333;
         }
 
         .toggle-theme {
@@ -170,17 +183,17 @@
         <h1>چت با هوش مصنوعی</h1>
 
         <div class="chat-window">
-            {% if question %}
-                <div class="chat-message sent">
-                    <p><strong>شما:</strong> {{ question }}</p>
-                </div>
-            {% endif %}
-
-            {% if answer %}
-                <div class="chat-message received">
-                    <p><strong>هوش مصنوعی:</strong> {{ answer }}</p>
-                </div>
-            {% endif %}
+            {% for message in conversation_history %}
+                {% if message.role == "user" %}
+                    <div class="chat-message sent">
+                        <p><strong>شما:</strong> {{ message.content }}</p>
+                    </div>
+                {% elif message.role == "assistant" %}
+                    <div class="chat-message received">
+                        <p><strong>هوش مصنوعی:</strong> {{ message.content }}</p>
+                    </div>
+                {% endif %}
+            {% endfor %}
 
             {% if error %}
                 <div class="error-message">
@@ -196,20 +209,23 @@
                 <button type="submit">ارسال</button>
             </form>
         </div>
+
+        <div class="form-container">
+            <form method="GET" action="{% url 'reset_chat' %}">
+                <button type="submit" class="reset-button">پاک کردن چت</button>
+            </form>
+        </div>
     </div>
 
     <script>
         function toggleTheme() {
             document.body.classList.toggle("dark-mode");
             const themeIcon = document.querySelector(".toggle-theme");
-            const title = document.querySelector("h1");
 
             if (document.body.classList.contains("dark-mode")) {
                 themeIcon.textContent = "🌞";
-                title.style.color = "#f1f3f6"; // Light color for dark mode
             } else {
                 themeIcon.textContent = "🌙";
-                title.style.color = "#333"; // Dark color for light mode
             }
         }
     </script>

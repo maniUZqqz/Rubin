@@ -11,8 +11,13 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from .forms import (
-    CustomUserCreationForm, CustomAuthenticationForm, ForgotPasswordForm,
-    OTPVerificationForm, ResetPasswordForm, FileUploadForm, DynamicValueForm
+    CustomUserCreationForm,
+    CustomAuthenticationForm,
+    ForgotPasswordForm,
+    OTPVerificationForm,
+    ResetPasswordForm,
+    FileUploadForm,
+    DynamicValueForm
 )
 from .models import CustomUser, UploadedFile, Student
 import markdown
@@ -31,14 +36,14 @@ from openai import OpenAI
 from .tasks import process_file_task
 from pinecone import Pinecone, ServerlessSpec
 
-
-
 # تنظیمات API
 # تنظیمات OpenAI
 client = OpenAI(
     base_url="https://api.avalai.ir/v1",
-    api_key="aa-bCMbGUMwByZarx3MXTKend7CBc39XhlofwT7RnBtvIrUSSxc"
+    api_key="aa-7Wb3vINvlb995eXrLJtsYl5lHoFlUk9j9Zj7j4MQviGhsZNt"
 )
+
+
 
 def chat_with_ai(request):
     if request.method == 'POST':
@@ -46,14 +51,13 @@ def chat_with_ai(request):
             # دریافت سوال از کاربر
             question = request.POST.get('question')
 
+            # دریافت تاریخچه چت از `session`
+            conversation_history = request.session.get('conversation_history', [])
+
             # دریافت تمام دانش‌آموزان از دیتابیس
             students = Student.objects.all()
 
-            # امبدینگ سوال
-
-            # سرچ کردن تو دیتابیس
-
-            # ساخت context با تمام اطلاعات دانش‌آموزان
+            # ساخت context با اطلاعات دانش‌آموزان
             context = "\n".join([
                 f"{student.full_name}: "
                 f"سن: {student.age}, "
@@ -64,8 +68,8 @@ def chat_with_ai(request):
                 f"کد ملی: {student.national_code}, "
                 f"کد پستی: {student.postal_code}, "
                 f"تاریخ تولد: {student.birth_date}, "
-                f"توضیحات: {student.Description}"
-                f"مهارت ها {student.skill}"
+                f"توضیحات: {student.Description}, "
+                f"مهارت ها: {student.skill}"
                 for student in students
             ])
 
@@ -80,12 +84,14 @@ def chat_with_ai(request):
             - پاسخ‌ها کوتاه و دقیق باشند.
             """
 
-            # ارسال درخواست به هوش مصنوعی
-            conversation_history = [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": question}
-            ]
+            # افزودن سیستم پرامپت به تاریخچه (در صورتی که اولین پیام باشد)
+            if not conversation_history:
+                conversation_history.append({"role": "system", "content": system_prompt})
 
+            # افزودن سوال کاربر به تاریخچه
+            conversation_history.append({"role": "user", "content": question})
+
+            # ارسال درخواست به هوش مصنوعی
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=conversation_history
@@ -94,21 +100,30 @@ def chat_with_ai(request):
             # دریافت پاسخ از هوش مصنوعی
             answer = response.choices[0].message.content.strip()
 
-            # رندر کردن صفحه HTML و ارسال پاسخ به تمپلیت
+            # افزودن پاسخ به تاریخچه
+            conversation_history.append({"role": "assistant", "content": answer})
+
+            # ذخیره تاریخچه در `session`
+            request.session['conversation_history'] = conversation_history
+
             return render(request, 'admin_panel/AI-Chat.html', {
-                'question': question,
-                'answer': answer,
-                'students': students,  # ارسال لیست دانش‌آموزان به تمپلیت (اختیاری)
+                'conversation_history': conversation_history
             })
 
         except Exception as e:
-            # در صورت خطا، یک پیام خطا نمایش دهید
             return render(request, 'admin_panel/AI-Chat.html', {
                 'error': str(e)
             })
 
-    # اگر درخواست GET باشد، فقط صفحه چت را نمایش دهید
-    return render(request, 'admin_panel/AI-Chat.html')
+    # نمایش صفحه همراه با تاریخچه چت در `session`
+    return render(request, 'admin_panel/AI-Chat.html', {
+        'conversation_history': request.session.get('conversation_history', [])
+    })
+
+
+def reset_chat(request):
+    request.session['conversation_history'] = []
+    return redirect('chat_with_ai')
 
 
 def add_dynamic_column(request):
@@ -157,16 +172,12 @@ class CustomLoginView(LoginView):
 
 # صفحه پروفایل کاربر
 qqz = "Rubi Code"
+
+
 @login_required
 def profile_view(request):
     files = UploadedFile.objects.all()
     form = FileUploadForm()
-
-    # صف
-
-    # ام بدینگ
-
-    # ذخیره در وکتور دیتابیس
 
     if request.method == 'POST':
         form = FileUploadForm(request.POST, request.FILES)
@@ -181,6 +192,8 @@ def profile_view(request):
         "account/profile.html",
         {"user": request.user, "files": files, "form": form}
     )
+
+
 # @login_required
 # def profile_view(request):
 #     files = UploadedFile.objects.all()
@@ -204,8 +217,6 @@ def profile_view(request):
 #         "account/profile.html",
 #         {"user": request.user, "files": files, "form": form}
 #     )
-
-
 
 
 @login_required
@@ -353,9 +364,12 @@ def admin_dashboard(request):
 #     return df.to_html(index=False)
 
 # تنظیمات Pinecone
+
 PINECONE_API_KEY = "pcsk_3JQw7_Jui1bJfxhxoPamQ7JseTpXzTBKHWka761AXJUtzML9opT9uTtoBPcmPNAE1uN8Q"
 INDEX_NAME = "rubin"  # نام اندکس Pinecone
 VECTOR_DIMENSION = 1536  # تعداد ابعاد امبدینگ مدل
+
+
 
 # ایجاد نمونه Pinecone
 try:
@@ -387,6 +401,7 @@ except Exception as e:
     print(f"Error accessing Pinecone index: {e}")
     raise
 
+
 def generate_embedding(text):
     """تولید امبدینگ برای متن داده شده"""
     try:
@@ -398,6 +413,7 @@ def generate_embedding(text):
     except Exception as e:
         print(f"Error generating embedding: {e}")
         raise
+
 
 def save_to_pinecone(vector_id, embedding, metadata):
     """ذخیره‌سازی امبدینگ در Pinecone"""
@@ -414,6 +430,7 @@ def save_to_pinecone(vector_id, embedding, metadata):
     except Exception as e:
         print(f"Error saving to Pinecone: {e}")
         raise
+
 
 def process_file(file_path, uploaded_file):
     if file_path.endswith('.csv'):
@@ -494,7 +511,9 @@ def process_file(file_path, uploaded_file):
     uploaded_file.students.set(students)
     uploaded_file.save()
     return df.to_html(index=False)
-# ====================================
+
+
+# ==================================================
 
 def add_student_view(request):
     if request.method == 'POST':
@@ -513,7 +532,6 @@ def add_student_view(request):
 
 
 def edit_student_view(request, student_id):
-
     student = Student.objects.get(id=student_id)
     dynamic_columns = DynamicColumn.objects.all()
 
@@ -571,6 +589,7 @@ def add_school_class(request):
         form = SchoolClassForm()
     return render(request, 'admin_panel/add_school_class.html', {'form': form})
 
+
 def edit_school_class(request, class_id):
     school_class = get_object_or_404(SchoolClass, id=class_id)
     if request.method == 'POST':
@@ -583,11 +602,9 @@ def edit_school_class(request, class_id):
         form = SchoolClassForm(instance=school_class)
     return render(request, 'admin_panel/edit_school_class.html', {'form': form, 'school_class': school_class})
 
+
 def delete_school_class(request, class_id):
     school_class = get_object_or_404(SchoolClass, id=class_id)
     school_class.delete()
     messages.success(request, "کلاس با موفقیت حذف شد!")
     return redirect('admin_dashboard')
-
-
-
