@@ -537,7 +537,10 @@ def process_file(file_path, uploaded_file):
                 card_number=row['شماره کارت'],
                 national_code=national_code,  # کد ملی به صورت رشته
                 postal_code=row['کد پستی'],
-                birth_date=gregorian_date
+                birth_date=gregorian_date,
+                Description=row.get('توضیحات', None),  # توضیحات
+                skill=row.get('مهارت ها', None),  # مهارت‌ها
+                email=row.get('ایمیل', None),  # ایمیل
             )
             student.save()
             students.append(student)
@@ -552,7 +555,10 @@ def process_file(file_path, uploaded_file):
                 f"آدرس: {row['آدرس خانه']}, "
                 f"کد ملی: {national_code}, "
                 f"کد پستی: {row['کد پستی']}, "
-                f"تاریخ تولد: {gregorian_date}"
+                f"تاریخ تولد: {gregorian_date}, "
+                f"توضیحات: {row.get('توضیحات', '')}, "
+                f"مهارت‌ها: {row.get('مهارت ها', '')}, "
+                f"ایمیل: {email}"
             )
 
             # تولید امبدینگ برای اطلاعات دانش‌آموز
@@ -574,6 +580,7 @@ def process_file(file_path, uploaded_file):
     uploaded_file.students.set(students)
     uploaded_file.save()
     return df.to_html(index=False)
+
 
 
 
@@ -609,6 +616,24 @@ def add_student_view(request):
             }
             save_to_pinecone(vector_id, embedding, metadata)
 
+            # اضافه کردن کاربر به لیست کاربران (CustomUser)
+            email = student.email  # فرض می‌کنیم ایمیل دانش‌آموز از فرم گرفته شده است
+            national_code = student.national_code
+            username = student.full_name  # نام کاربری همان نام کامل است
+
+            # ایجاد یا به‌روزرسانی کاربر
+            user, created = CustomUser.objects.get_or_create(
+                username=username,
+                defaults={
+                    'email': email,
+                    'national_code': national_code,
+                    'user_type': 'student',  # نوع کاربر به‌طور پیش‌فرض 'student' است
+                }
+            )
+            if created:
+                user.set_password(national_code)  # رمز عبور همان کد ملی است (به صورت رشته)
+                user.save()
+
             return redirect('admin_dashboard')
     else:
         form = StudentForm()
@@ -617,6 +642,7 @@ def add_student_view(request):
         'admin_panel/add_student.html',
         {'form': form}
     )
+
 
 
 def edit_student_view(request, student_id):

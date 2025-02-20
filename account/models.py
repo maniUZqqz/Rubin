@@ -60,6 +60,7 @@ class Student(models.Model):
     birth_date = models.DateField(verbose_name="تاریخ تولد")
     Description = models.TextField(verbose_name="توضیحات", null=True)
     skill = models.TextField(verbose_name="مهارت ها", null=True)
+    email = models.EmailField(null=True, blank=True)
 
     def __str__(self):
         return self.full_name
