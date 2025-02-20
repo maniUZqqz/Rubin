@@ -645,44 +645,69 @@ def add_student_view(request):
 
 
 
+@login_required
 def edit_student_view(request, student_id):
-    student = Student.objects.get(id=student_id)
-    dynamic_columns = DynamicColumn.objects.all()
-
-    if request.method == 'POST':
-        student_form = StudentForm(request.POST, instance=student)
-        if student_form.is_valid():
-            student_form.save()
-
-        for column in dynamic_columns:
-            dynamic_value, created = DynamicValue.objects.get_or_create(
-                student=student,
-                column=column
-            )
-            form = DynamicValueForm(request.POST, instance=dynamic_value, column=column)
-            if form.is_valid():
-                form.save()
-
-        messages.success(request, "اطلاعات با موفقیت بروزرسانی شد!")
+    try:
+        student = Student.objects.get(id=student_id)  # پیدا کردن دانش‌آموز از طریق آیدی
+    except Student.DoesNotExist:
+        messages.error(request, "دانش‌آموز مورد نظر یافت نشد.")
         return redirect('admin_dashboard')
 
-    student_form = StudentForm(instance=student)
-    forms = []
-    for column in dynamic_columns:
-        dynamic_value, created = DynamicValue.objects.get_or_create(
-            student=student,
-            column=column
-        )
-        form = DynamicValueForm(instance=dynamic_value, column=column)
-        forms.append(form)
+    if request.method == 'POST':
+        form = StudentForm(request.POST, instance=student)  # فرم برای ویرایش اطلاعات دانش‌آموز
 
-    context = {
-        'student': student,
-        'student_form': student_form,
-        'dynamic_columns': dynamic_columns,
-        'forms': forms,
-    }
-    return render(request, 'admin_panel/edit_student.html', context)
+        if form.is_valid():
+            # ذخیره تغییرات در دیتابیس
+            student = form.save()  # ذخیره اطلاعات ویرایش‌شده دانش‌آموز
+
+            # ترکیب اطلاعات جدید دانش‌آموز در یک رشته
+            student_info = (
+                f"نام و نام خانوادگی: {student.full_name}, "
+                f"سن: {student.age}, "
+                f"رشته: {student.major}, "
+                f"شغل پدر: {student.father_job}, "
+                f"مسیر: {student.path}, "
+                f"آدرس: {student.address}, "
+                f"کد ملی: {student.national_code}, "
+                f"کد پستی: {student.postal_code}, "
+                f"تاریخ تولد: {student.birth_date}, "
+                f"توضیحات: {student.Description}, "
+                f"مهارت‌ها: {student.skill}, "
+                f"ایمیل: {student.email}"
+            )
+
+            # تولید امبدینگ برای اطلاعات ویرایش‌شده
+            embedding = generate_embedding(student_info)
+
+            # به‌روزرسانی وکتور در Pinecone
+            vector_id = f"student_{student.id}"  # آیدی منحصر به‌فرد برای وکتور
+            metadata = {
+                "full_name": student.full_name,
+                "national_code": student.national_code,
+                "birth_date": student.birth_date.strftime("%Y-%m-%d")
+            }
+
+            # ذخیره‌سازی وکتور جدید در Pinecone (آپدیت یا افزودن)
+            save_to_pinecone(vector_id, embedding, metadata)
+
+            messages.success(request, "پروفایل دانش‌آموز با موفقیت بروزرسانی شد!")
+            return redirect('admin_dashboard')  # هدایت به داشبورد ادمین یا هر صفحه دلخواه
+
+    else:
+        form = StudentForm(instance=student)  # فرم با داده‌های موجود برای ویرایش
+
+    return render(request, 'admin_panel/edit_student.html', {'form': form, 'student': student})
+
+
+def check_vector_in_pinecone(vector_id):
+    try:
+        result = index.fetch([vector_id])
+        if result and vector_id in result:
+            print(f"Vector with ID '{vector_id}' exists in Pinecone.")
+        else:
+            print(f"Vector with ID '{vector_id}' does not exist in Pinecone.")
+    except Exception as e:
+        print(f"Error checking vector in Pinecone: {e}")
 
 
 

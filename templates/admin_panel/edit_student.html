@@ -39,37 +39,81 @@
 
 {% block body %}
 
-    <div class="d-flex align-items-center justify-content-center min-vh-100 bg-light">
-        <div class="card shadow-lg border-0 p-4" style="max-width: 500px; width: 100%;">
-            <div class="card-body">
-                <h2 class="text-center mb-4 text-success fw-bold">ویرایش دانش‌آموز: {{ student.full_name }}</h2>
-                <form method="post" class="needs-validation" novalidate>
+    <h1>ویرایش پروفایل دانش‌آموز</h1>
 
-                    {% csrf_token %}
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
 
-                    <!-- نمایش فرم‌های پیش‌فرض -->
-                    {{ student_form.as_p }}
-
-                    <!-- نمایش فرم‌های دینامیک -->
-                    {% for form in forms %}
-                        <div class="form-group">
-                            <label>{{ form.label }}</label>
-                            {{ form }}
-                        </div>
-                    {% endfor %}
-
-                    <button type="submit" class="btn btn-success w-100 py-2 fw-bold shadow-sm">
-                        ذخیره تغییرات
-                    </button>
-                </form>
-                <div class="text-center mt-3">
-                    <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary w-100 py-2">
-                        بازگشت به داشبورد
-                    </a>
-                </div>
-            </div>
+        <div class="form-group">
+            <label for="full_name">نام و نام خانوادگی:</label>
+            {{ form.full_name }}
         </div>
-    </div>
+
+        <div class="form-group">
+            <label for="age">سن:</label>
+            {{ form.age }}
+        </div>
+
+        <div class="form-group">
+            <label for="major">رشته:</label>
+            {{ form.major }}
+        </div>
+
+        <div class="form-group">
+            <label for="father_job">شغل پدر:</label>
+            {{ form.father_job }}
+        </div>
+
+        <div class="form-group">
+            <label for="path">مسیر:</label>
+            {{ form.path }}
+        </div>
+
+        <div class="form-group">
+            <label for="address">آدرس خانه:</label>
+            {{ form.address }}
+        </div>
+
+        <div class="form-group">
+            <label for="card_number">شماره کارت:</label>
+            {{ form.card_number }}
+        </div>
+
+        <div class="form-group">
+            <label for="national_code">کد ملی:</label>
+            {{ form.national_code }}
+        </div>
+
+        <div class="form-group">
+            <label for="postal_code">کد پستی:</label>
+            {{ form.postal_code }}
+        </div>
+
+        <div class="form-group">
+            <label for="birth_date">تاریخ تولد:</label>
+            {{ form.birth_date }}
+        </div>
+
+        <div class="form-group">
+            <label for="Description">توضیحات:</label>
+            {{ form.Description }}
+        </div>
+
+        <div class="form-group">
+            <label for="skill">مهارت‌ها:</label>
+            {{ form.skill }}
+        </div>
+
+        <div class="form-group">
+            <label for="email">ایمیل:</label>
+            {{ form.email }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">ذخیره تغییرات</button>
+    </form>
+
+    <br>
+    <a href="{% url 'admin_dashboard' %}">بازگشت به داشبورد</a>
 
 {% endblock %}
 
