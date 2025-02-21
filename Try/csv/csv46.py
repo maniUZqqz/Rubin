@@ -18,7 +18,7 @@ ages = list(range(14, 19))
 
 # ایجاد 99 دانش‌آموز با داده‌های فیک
 students = []
-for _ in range(99):
+for _ in range(15):
     full_name = fake.name()  # نام و نام خانوادگی
     age = random.choice(ages)  # سن بین 14 تا 18 سال
     major = random.choice(majors)  # رشته تحصیلی از بین رشته‌های تعریف‌شده

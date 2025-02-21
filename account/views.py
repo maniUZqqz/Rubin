@@ -36,90 +36,17 @@ import json
 from openai import OpenAI
 from .tasks import process_file_task
 from pinecone import Pinecone, ServerlessSpec
+import sys
+import io
 
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 # تنظیمات API
 # تنظیمات OpenAI
 client = OpenAI(
     base_url="https://api.avalai.ir/v1",
     api_key="aa-7Wb3vINvlb995eXrLJtsYl5lHoFlUk9j9Zj7j4MQviGhsZNt"
 )
-
-
-
-def chat_with_ai(request):
-    if request.method == 'POST':
-        try:
-            # دریافت سوال از کاربر
-            question = request.POST.get('question')
-
-            # دریافت تاریخچه چت از `session`
-            conversation_history = request.session.get('conversation_history', [])
-
-            # دریافت تمام دانش‌آموزان از دیتابیس
-            students = Student.objects.all()
-
-            # ساخت context با اطلاعات دانش‌آموزان
-            context = "\n".join([
-                f"{student.full_name}: "
-                f"سن: {student.age}, "
-                f"رشته: {student.major}, "
-                f"وضعیت در روبیکمپ: {student.path}, "
-                f"شغل پدر: {student.father_job}, "
-                f"آدرس: {student.address}, "
-                f"کد ملی: {student.national_code}, "
-                f"کد پستی: {student.postal_code}, "
-                f"تاریخ تولد: {student.birth_date}, "
-                f"توضیحات: {student.Description}, "
-                f"مهارت ها: {student.skill}"
-                for student in students
-            ])
-
-            # آماده‌سازی پرامپت برای مدل
-            system_prompt = f"""
-            شما یک دستیار هوشمند هستید که فقط بر اساس متن زیر به سوالات پاسخ می‌دهید:
-            متن:
-            {context}
-
-            - اگر جواب در متن وجود نداشت، فقط بنویسید: "جواب پیدا نشد".
-            - خارج از متن نظری ندید.
-            - پاسخ‌ها کوتاه و دقیق باشند.
-            """
-
-            # افزودن سیستم پرامپت به تاریخچه (در صورتی که اولین پیام باشد)
-            if not conversation_history:
-                conversation_history.append({"role": "system", "content": system_prompt})
-
-            # افزودن سوال کاربر به تاریخچه
-            conversation_history.append({"role": "user", "content": question})
-
-            # ارسال درخواست به هوش مصنوعی
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=conversation_history
-            )
-
-            # دریافت پاسخ از هوش مصنوعی
-            answer = response.choices[0].message.content.strip()
-
-            # افزودن پاسخ به تاریخچه
-            conversation_history.append({"role": "assistant", "content": answer})
-
-            # ذخیره تاریخچه در `session`
-            request.session['conversation_history'] = conversation_history
-
-            return render(request, 'admin_panel/AI-Chat.html', {
-                'conversation_history': conversation_history
-            })
-
-        except Exception as e:
-            return render(request, 'admin_panel/AI-Chat.html', {
-                'error': str(e)
-            })
-
-    # نمایش صفحه همراه با تاریخچه چت در `session`
-    return render(request, 'admin_panel/AI-Chat.html', {
-        'conversation_history': request.session.get('conversation_history', [])
-    })
 
 
 def reset_chat(request):
@@ -377,6 +304,7 @@ def student_detail_view(request, student_id):
         'conversation_history': request.session.get(f'conversation_history_{student_id}', [])
     })
 
+
 # def process_file(file_path, uploaded_file):
 #     if file_path.endswith('.csv'):
 #         df = pd.read_csv(file_path)
@@ -429,10 +357,8 @@ def student_detail_view(request, student_id):
 # تنظیمات Pinecone
 
 PINECONE_API_KEY = "pcsk_3JQw7_Jui1bJfxhxoPamQ7JseTpXzTBKHWka761AXJUtzML9opT9uTtoBPcmPNAE1uN8Q"
-INDEX_NAME = "rubin"  # نام اندکس Pinecone
+INDEX_NAME = "test"  # نام اندکس Pinecone
 VECTOR_DIMENSION = 1536  # تعداد ابعاد امبدینگ مدل
-
-
 
 # ایجاد نمونه Pinecone
 try:
@@ -566,11 +492,17 @@ def process_file(file_path, uploaded_file):
 
             # ذخیره‌سازی در Pinecone
             vector_id = f"student_{student.id}"  # آیدی منحصر به‌فرد برای بردار
+
             metadata = {
-                "full_name": row['نام و نام خانوادگی'],
-                "national_code": national_code,
-                "birth_date": gregorian_date.strftime("%Y-%m-%d")
+                "full_name": student.full_name,
+                "national_code": student.national_code,
+                "major": student.major,
+                "description": student.Description,
+                "skill": student.skill,
+                "email": student.email,
+                "All data": student_info
             }
+
             save_to_pinecone(vector_id, embedding, metadata)
 
         except Exception as e:
@@ -580,8 +512,6 @@ def process_file(file_path, uploaded_file):
     uploaded_file.students.set(students)
     uploaded_file.save()
     return df.to_html(index=False)
-
-
 
 
 def add_student_view(request):
@@ -601,7 +531,10 @@ def add_student_view(request):
                 f"آدرس: {student.address}, "
                 f"کد ملی: {student.national_code}, "
                 f"کد پستی: {student.postal_code}, "
-                f"تاریخ تولد: {student.birth_date}"
+                f"تاریخ تولد: {student.birth_date}, "
+                f"توضیحات: {student.Description}, "
+                f"مهارت‌ها: {student.skill}, "
+                f"ایمیل: {student.email}"
             )
 
             # تولید امبدینگ برای اطلاعات دانش‌آموز
@@ -612,9 +545,20 @@ def add_student_view(request):
             metadata = {
                 "full_name": student.full_name,
                 "national_code": student.national_code,
-                "birth_date": student.birth_date.strftime("%Y-%m-%d")
+                "birth_date": student.birth_date.strftime("%Y-%m-%d"),
+                "age": student.age,
+                "major": student.major,
+                "father_job": student.father_job,
+                "path": student.path,
+                "address": student.address,
+                "card_number": student.card_number,
+                "postal_code": student.postal_code,
+                "description": student.Description,
+                "skill": student.skill,
+                "email": student.email,
+                "All data": student_info,
             }
-            save_to_pinecone(vector_id, embedding, metadata)
+            save_to_pinecone(vector_id, embedding, metadata)  # ذخیره‌سازی متادیتا به همراه وکتور
 
             # اضافه کردن کاربر به لیست کاربران (CustomUser)
             email = student.email  # فرض می‌کنیم ایمیل دانش‌آموز از فرم گرفته شده است
@@ -642,7 +586,6 @@ def add_student_view(request):
         'admin_panel/add_student.html',
         {'form': form}
     )
-
 
 
 @login_required
@@ -681,10 +624,15 @@ def edit_student_view(request, student_id):
 
             # به‌روزرسانی وکتور در Pinecone
             vector_id = f"student_{student.id}"  # آیدی منحصر به‌فرد برای وکتور
+
             metadata = {
                 "full_name": student.full_name,
                 "national_code": student.national_code,
-                "birth_date": student.birth_date.strftime("%Y-%m-%d")
+                "major": student.major,
+                "description": student.Description,
+                "skill": student.skill,
+                "email": student.email,
+                "All data": student_info
             }
 
             # ذخیره‌سازی وکتور جدید در Pinecone (آپدیت یا افزودن)
@@ -699,6 +647,89 @@ def edit_student_view(request, student_id):
     return render(request, 'admin_panel/edit_student.html', {'form': form, 'student': student})
 
 
+def chat_with_ai(request):
+    if request.method == 'POST':
+        try:
+            sys.stdout.reconfigure(encoding="utf-8")
+
+            print("سلام دنیا!")
+
+            question = request.POST.get('question')
+            conversation_history = request.session.get('conversation_history', [])
+
+            # مرحله ۱: تبدیل سوال به وکتور
+            question_embedding = generate_embedding(question)
+
+            # مرحله ۲: جستجو در Pinecone
+            search_results = index.query(
+                vector=question_embedding,
+                top_k=5,  # دریافت ۵ نتیجه نزدیک‌تر
+                include_metadata=True
+            )
+
+            # لاگ کردن نتایج جستجو در ترمینال
+            if search_results:
+                print("نتایج یافت شد.")
+            else:
+                print("نتیجه‌ای یافت نشد.")
+
+            # مرحله ۳: پردازش نتایج جستجو
+            if search_results and "matches" in search_results:
+                retrieved_info = "\n\n".join([
+                    (
+                        f"نام و نام خانوادگی: {match['metadata'].get('full_name', 'نامشخص')}\n"
+                        f"رشته: {match['metadata'].get('major', 'نامشخص')}\n"
+                        f"کد ملی: {match['metadata'].get('national_code', 'نامشخص')}\n"
+                        f"توضیحات: {match['metadata'].get('description', 'نامشخص')}\n"
+                        f"مهارت‌ها: {match['metadata'].get('skill', 'نامشخص')}\n"
+                        f"ایمیل: {match['metadata'].get('email', 'نامشخص')}"
+                        f"همه اطلاعات : {match['metadata'].get('All data', 'نامشخص')}"
+                    ) for match in search_results["matches"]
+                ])
+            else:
+                retrieved_info = "جواب پیدا نشد."
+                print("جواب پیدا نشد.")  # لاگ کردن زمانی که چیزی پیدا نشده است
+
+            # مرحله ۴: آماده‌سازی پرامپت مدل
+            system_prompt = f"""
+            شما یک دستیار هوشمند هستید که فقط بر اساس اطلاعات زیر پاسخ می‌دهید:
+            {retrieved_info}
+
+            - اگر جواب در داده‌ها نبود، فقط بنویسید: "جواب پیدا نشد".
+            - خارج از متن نظری ندهید.
+            """
+
+            if not conversation_history:
+                conversation_history.append({"role": "system", "content": system_prompt})
+
+            conversation_history.append({"role": "user", "content": question})
+
+            # مرحله ۵: ارسال درخواست به هوش مصنوعی
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=conversation_history
+            )
+
+            answer = response.choices[0].message.content.strip()
+            conversation_history.append({"role": "assistant", "content": answer})
+
+            request.session['conversation_history'] = conversation_history
+
+            return render(request, 'admin_panel/AI-Chat.html', {
+                'conversation_history': conversation_history
+            })
+
+        except Exception as e:
+            print(f"خطا در پردازش: {e}")  # لاگ کردن خطا در ترمینال
+            return render(request, 'admin_panel/AI-Chat.html', {
+                'error': str(e)
+            })
+
+    return render(request, 'admin_panel/AI-Chat.html', {
+        'conversation_history': request.session.get('conversation_history', [])
+    })
+
+
 def check_vector_in_pinecone(vector_id):
     try:
         result = index.fetch([vector_id])
@@ -710,6 +741,80 @@ def check_vector_in_pinecone(vector_id):
         print(f"Error checking vector in Pinecone: {e}")
 
 
+# def chat_with_ai(request):
+#     if request.method == 'POST':
+#         try:
+#             # دریافت سوال از کاربر
+#             question = request.POST.get('question')
+#
+#             # دریافت تاریخچه چت از `session`
+#             conversation_history = request.session.get('conversation_history', [])
+#
+#             # دریافت تمام دانش‌آموزان از دیتابیس
+#             students = Student.objects.all()
+#
+#             # ساخت context با اطلاعات دانش‌آموزان
+#             context = "\n".join([
+#                 f"{student.full_name}: "
+#                 f"سن: {student.age}, "
+#                 f"رشته: {student.major}, "
+#                 f"وضعیت در روبیکمپ: {student.path}, "
+#                 f"شغل پدر: {student.father_job}, "
+#                 f"آدرس: {student.address}, "
+#                 f"کد ملی: {student.national_code}, "
+#                 f"کد پستی: {student.postal_code}, "
+#                 f"تاریخ تولد: {student.birth_date}, "
+#                 f"توضیحات: {student.Description}, "
+#                 f"مهارت ها: {student.skill}"
+#                 for student in students
+#             ])
+#
+#             # آماده‌سازی پرامپت برای مدل
+#             system_prompt = f"""
+#             شما یک دستیار هوشمند هستید که فقط بر اساس متن زیر به سوالات پاسخ می‌دهید:
+#             متن:
+#             {context}
+#
+#             - اگر جواب در متن وجود نداشت، فقط بنویسید: "جواب پیدا نشد".
+#             - خارج از متن نظری ندید.
+#             - پاسخ‌ها کوتاه و دقیق باشند.
+#             """
+#
+#             # افزودن سیستم پرامپت به تاریخچه (در صورتی که اولین پیام باشد)
+#             if not conversation_history:
+#                 conversation_history.append({"role": "system", "content": system_prompt})
+#
+#             # افزودن سوال کاربر به تاریخچه
+#             conversation_history.append({"role": "user", "content": question})
+#
+#             # ارسال درخواست به هوش مصنوعی
+#             response = client.chat.completions.create(
+#                 model="gpt-4o-mini",
+#                 messages=conversation_history
+#             )
+#
+#             # دریافت پاسخ از هوش مصنوعی
+#             answer = response.choices[0].message.content.strip()
+#
+#             # افزودن پاسخ به تاریخچه
+#             conversation_history.append({"role": "assistant", "content": answer})
+#
+#             # ذخیره تاریخچه در `session`
+#             request.session['conversation_history'] = conversation_history
+#
+#             return render(request, 'admin_panel/AI-Chat.html', {
+#                 'conversation_history': conversation_history
+#             })
+#
+#         except Exception as e:
+#             return render(request, 'admin_panel/AI-Chat.html', {
+#                 'error': str(e)
+#             })
+#
+#     # نمایش صفحه همراه با تاریخچه چت در `session`
+#     return render(request, 'admin_panel/AI-Chat.html', {
+#         'conversation_history': request.session.get('conversation_history', [])
+#     })
 
 def delete_student_view(request, student_id):
     student = Student.objects.get(id=student_id)
